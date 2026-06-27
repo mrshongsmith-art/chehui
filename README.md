@@ -1,35 +1,35 @@
 # chehui
 
-`chehui` is an AstrBot plugin that automatically recalls bot messages after a configured delay when incoming messages match specific keyword rules.
+`chehui` 是一个 AstrBot 插件，用于根据关键词规则自动撤回机器人发送的消息。
 
-## Features
+## 功能特性
 
-- Matches incoming messages by configurable keyword prefixes.
-- Recalls the bot's next sent message in the same private chat or group chat.
-- Supports delayed recall per rule.
-- Falls back to recent message history when the send action does not return a message ID.
-- Cleans up pending recall tasks when the plugin is unloaded.
+- 支持按关键词前缀匹配用户消息。
+- 支持为不同关键词规则配置不同的撤回延迟。
+- 只撤回触发事件所在会话中机器人随后发送的第一条消息，降低误撤回概率。
+- 当发送接口未返回消息 ID 时，会尝试从最近消息记录中查找并补偿撤回。
+- 插件卸载时会清理待执行的撤回任务。
 
-## Installation
+## 安装方式
 
-1. Copy this folder to the AstrBot plugin directory:
+将本插件目录复制到 AstrBot 的插件目录中：
 
-   ```text
-   data/plugins/chehui
-   ```
+```text
+data/plugins/chehui
+```
 
-2. Restart AstrBot or reload plugins from the AstrBot dashboard.
+然后重启 AstrBot，或在 AstrBot 控制台中重新加载插件。
 
-## Configuration
+## 配置说明
 
-Edit `config.py` and update `retraction_rules`.
+编辑 `config.py` 中的 `retraction_rules` 配置项。
 
-Each rule contains:
+每条规则包含两个字段：
 
-- `keywords`: A set of message prefixes that trigger recall.
-- `delay`: The number of seconds to wait before recalling the bot message.
+- `keywords`：触发撤回的关键词集合。用户消息以其中任意关键词开头时会触发规则。
+- `delay`：机器人发送消息后等待多少秒再执行撤回。
 
-Example:
+示例：
 
 ```python
 retraction_rules: list[dict[str, set[str] | int]] = [
@@ -40,14 +40,17 @@ retraction_rules: list[dict[str, set[str] | int]] = [
 ]
 ```
 
-When a user sends a message that starts with one of the configured keywords, the plugin binds the rule to the current event and recalls the bot's next outgoing message in the same conversation after the configured delay.
+当用户发送的消息以 `签到` 或 `打卡` 开头时，插件会记录当前会话，并在机器人回复后等待 60 秒撤回该回复。
 
-## Notes
+## 使用注意
 
-- The plugin depends on AstrBot's plugin runtime and OneBot-compatible message actions.
-- Recall success depends on the bot account's permissions and the adapter's support for recall actions.
-- The current source files may display garbled Chinese text if opened with the wrong file encoding. Use UTF-8 when editing new documentation and configuration changes.
+- 插件依赖 AstrBot 插件运行环境。
+- 撤回功能依赖适配器和机器人账号权限；如果平台或账号不允许撤回，插件可能无法成功撤回消息。
+- 建议根据实际业务场景精简关键词，避免过宽的匹配规则导致不符合预期的撤回。
+- 如果修改源码，请使用 UTF-8 编码保存文件。
 
-## License
+## 开源许可
 
-This project is released under the license in `LICENSE`. You may freely use, copy, modify, distribute, and further develop this project.
+本项目采用 `LICENSE` 文件中的开源许可。
+
+你可以自由使用、复制、修改、分发和二次开发本项目，但需要保留原始版权声明和许可声明。
